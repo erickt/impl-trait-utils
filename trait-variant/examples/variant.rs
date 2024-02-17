@@ -8,7 +8,7 @@
 
 use std::{fmt::Display, future::Future};
 
-#[trait_variant::make(IntFactory: Send)]
+#[trait_make::make(IntFactory: Send)]
 pub trait LocalIntFactory {
     const NAME: &'static str;
 
@@ -23,8 +23,31 @@ pub trait LocalIntFactory {
     fn default_stream(&self) -> impl Iterator<Item = i32> {
         [1].into_iter()
     }
-    async fn default_method(&self) -> u32 {
+    async fn default_method(&self, x: u32) -> u32 {
+        x
+    }
+    fn sync_default_method(&self) -> u32 {
         1
+    }
+}
+
+#[trait_make::make(Send)]
+pub trait AnotherIntFactory {
+    const NAME: &'static str;
+
+    type MyFut<'a>: Future
+    where
+        Self: 'a;
+
+    async fn make(&self, x: u32, y: &str) -> i32;
+    fn stream(&self) -> impl Iterator<Item = i32>;
+    fn call(&self) -> u32;
+    fn another_async(&self, input: Result<(), &str>) -> Self::MyFut<'_>;
+    fn default_stream(&self) -> impl Iterator<Item = i32> {
+        [1].into_iter()
+    }
+    async fn default_method(&self, x: u32) -> u32 {
+        x
     }
     fn sync_default_method(&self) -> u32 {
         1
@@ -35,13 +58,23 @@ pub trait LocalIntFactory {
 fn spawn_task(factory: impl IntFactory + 'static) {
     tokio::spawn(async move {
         let _int = factory.make(1, "foo").await;
-        let _default_int = factory.default_method().await;
+        let _default_int = factory.default_method(1).await;
         let _default_stream = factory.default_stream();
         let _sync_default_int = factory.sync_default_method();
     });
 }
 
-#[trait_variant::make(GenericTrait: Send)]
+#[allow(dead_code)]
+fn spawn_another_task(factory: impl AnotherIntFactory + 'static) {
+    tokio::spawn(async move {
+        let _int = factory.make(1, "foo").await;
+        let _default_int = factory.default_method(1).await;
+        let _default_stream = factory.default_stream();
+        let _sync_default_int = factory.sync_default_method();
+    });
+}
+
+#[trait_make::make(GenericTrait: Send)]
 pub trait LocalGenericTrait<'x, S: Sync, Y, const X: usize>
 where
     Y: Sync,
@@ -55,7 +88,7 @@ where
     fn build<T: Display>(&self, items: impl Iterator<Item = T>) -> Self::B<T>;
 }
 
-#[trait_variant::make(Send + Sync)]
+#[trait_make::make(Send + Sync)]
 pub trait GenericTraitWithBounds<'x, S: Sync, Y, const X: usize>
 where
     Y: Sync,

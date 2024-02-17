@@ -14,7 +14,7 @@ mod variant;
 /// fn` and/or `-> impl Trait` return types.
 ///
 /// ```
-/// #[trait_variant::make(Send)]
+/// #[trait_make::make(Send)]
 /// trait IntFactory {
 ///     async fn make(&self) -> i32;
 ///     fn stream(&self) -> impl Iterator<Item = i32>;
@@ -39,7 +39,7 @@ mod variant;
 /// fn` and/or `-> impl Trait` return types.
 ///
 /// ```
-/// #[trait_variant::make(IntFactory: Send)]
+/// #[trait_make::make(IntFactory: Send)]
 /// trait LocalIntFactory {
 ///     async fn make(&self) -> i32;
 ///     fn stream(&self) -> impl Iterator<Item = i32>;
