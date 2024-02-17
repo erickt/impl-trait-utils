@@ -2,6 +2,11 @@
 
 fork from https://github.com/rust-lang/impl-trait-utils
 
+`trait_variant` is a good lib, but it still doesn't support default method, so fork it and create a new lib `trait-make`
+to support default method
+
+users can replace `trait_variant` with a few change
+
 ## `trait_make`
 
 `trait_make` generates a specialized version of a base trait that uses `async fn` and/or `-> impl Trait`.
